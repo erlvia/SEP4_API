@@ -11,6 +11,8 @@
 #include <avr/io.h>
 #include <stdio.h>
 
+#include "led.h"
+
 static int uart0_putchar(char c, FILE *stream);
 static int uart0_getchar(FILE *stream);
 
@@ -24,15 +26,16 @@ static uint8_t uart0_rx_storage[UART_STDIO_RX_BUFFER_SIZE];  // Backing storage 
 void uart0_rx_callback(uint8_t byte)
 {
     // Push received byte into ring buffer.
-    ringbuffer_push(uart0_rx_buffer, &byte);
+    ringbuffer_push(&uart0_rx_buffer, &byte);
 }
 
 uart_t uart_stdio_init(uint32_t baud)
 {
     // Create ringbuffer for incoming bytes on UART0
-    if(!ringbuffer_init_static(uart0_rx_buffer, uart0_rx_storage, 
+    if(!ringbuffer_init_static(&uart0_rx_buffer, uart0_rx_storage, 
                       sizeof(uart0_rx_storage), UART_STDIO_RX_BUFFER_SIZE, 1 ))
     {
+        led_on(2); // Turn on LED1 to indicate error in ringbuffer initialization
         return UART_ERROR_INIT_FAILED; // Failed to initialize ringbuffer
     }
 
@@ -65,8 +68,11 @@ static int uart0_getchar(FILE *stream)
     (void)stream;
 
 //    int8_t c = uart_read_byte_blocking(UART0_ID);
-    int8_t c = 0;
-    ringbuffer_pop(uart0_rx_buffer, &c);
+    int8_t c;
+    
+    if(!ringbuffer_pop(&uart0_rx_buffer, &c)) {
+        return EOF; // No data available
+    }
 
     // Convert CR to NL (makes enter key work as expected)
     if (c == '\r') c = '\n';

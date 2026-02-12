@@ -44,7 +44,11 @@ int main(void)
     led_init();
     pir_init(pir_callback);
     display_init();
-    uart_stdio_init(115200);    // Initialize UART stdio at 115200 baud. Must be same on terminal.
+    // Initialize UART stdio at 115200 baud. Must be same on terminal.
+    if(UART_OK != uart_stdio_init(115200))
+    {
+        led_on(1); // Tænd LED1 for at indikere fejl ved UART init
+    }
 
     printf("UART stdio klar.\n");
     printf("Skriv et tal og tryk Enter.\n");
