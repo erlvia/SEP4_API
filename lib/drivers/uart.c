@@ -20,6 +20,10 @@ static rx_callback_t uart0_rx_callback = NULL;
 static rx_callback_t uart1_rx_callback = NULL;
 static rx_callback_t uart2_rx_callback = NULL;
 static rx_callback_t uart3_rx_callback = NULL;
+// static ringbuffer_t uart0_rx_buffer;
+// static ringbuffer_t uart1_rx_buffer;
+// static ringbuffer_t uart2_rx_buffer;
+// static ringbuffer_t uart3_rx_buffer;
 
 static inline uint16_t ubrr_from_baud(uint32_t baud)
 {
@@ -46,6 +50,7 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ri
         {
             UCSR0B |= (1 << RXCIE0);            // Enable RX Complete Interrupt
             uart0_rx_callback = rx_callback;    // Store callback for use in ISR
+//            uart0_rx_buffer = rx_buffer;        // Store ring buffer for use in ISR
         }
         break;
     case 1:
@@ -138,6 +143,25 @@ uint8_t uart_read_byte_blocking(uart_id_t uart_id)
     }
     return 0;
 }
+
+// uint8_t uart_read_byte(uart_id_t uart_id)
+// {
+//     uint8_t b;
+
+//     switch (uart_id)
+//     {
+//     case UART0_ID:
+//         ringbuffer_pop(&uart0_rx_buffer, &b);
+//         return b;
+//     case UART1_ID:
+//         ringbuffer_pop(&uart1_rx_buffer, &b);
+//         return b; 
+//     case UART2_ID:
+//     case UART3_ID:
+//     }
+//     return 0;
+// }
+
 
 ISR(USART0_RX_vect)
 {

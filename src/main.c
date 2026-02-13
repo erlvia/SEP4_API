@@ -47,7 +47,7 @@ int main(void)
     // Initialize UART stdio at 115200 baud. Must be same on terminal.
     if(UART_OK != uart_stdio_init(115200))
     {
-        led_on(1); // Tænd LED1 for at indikere fejl ved UART init
+        led_on(4); // Tænd LED1 for at indikere fejl ved UART init
     }
 
     printf("UART stdio klar.\n");
