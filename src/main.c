@@ -95,19 +95,19 @@ int main(void)
         // {
         //     // Hvis scanf fejler (f.eks. bogstaver), ryd input-linjen
         //     printf("Ugyldigt input. Prøv igen.\n");
-        //     int ch;
-        //     do 
-        //     { 
-        //         ch = getchar(); 
-        //         putchar(ch);
-        //     } while (ch != '\n' && ch != EOF);
+            int ch;
+            do 
+            { 
+                ch = getchar(); 
+                putchar(ch);
+            } while (ch != '\n' && ch != EOF);
         // }
-        uint8_t ch;
-            ch = uart_read_byte(UART0_ID);
-            if(ch != 0) // Check if a byte was read
-            {
-                putchar(ch); // Echo the received byte back to the terminal
-            }        
+        // uint8_t ch;
+        //     ch = uart_read_byte(UART0_ID);
+        //     if(ch != 0) // Check if a byte was read
+        //     {
+        //         putchar(ch); // Echo the received byte back to the terminal
+        //     }        
 
         _delay_ms(200);
     }
