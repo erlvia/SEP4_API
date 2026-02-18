@@ -17,9 +17,9 @@
 #include <avr/interrupt.h>
 
 static ringbuffer_t *uart0_rx_buffer = NULL;
-// static ringbuffer_t *uart1_rx_buffer = NULL;
-// static ringbuffer_t *uart2_rx_buffer = NULL;
-// static ringbuffer_t *uart3_rx_buffer = NULL;
+static ringbuffer_t *uart1_rx_buffer = NULL;
+static ringbuffer_t *uart2_rx_buffer = NULL;
+static ringbuffer_t *uart3_rx_buffer = NULL;
 
 
 static inline uint16_t ubrr_from_baud(uint32_t baud)
@@ -62,6 +62,14 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
         UCSR1B = (1 << RXEN1) | (1 << TXEN1);   // Enable RX + TX
         UCSR1C = (1 << UCSZ11) | (1 << UCSZ10); // 8N1
         
+        if(buffer_size > 0) 
+        {
+            uart1_rx_buffer = ringbuffer_create(buffer_size, sizeof(uint8_t));
+            if (!uart1_rx_buffer) {
+                return UART_ERROR_INIT_FAILED;
+            }
+            UCSR1B |= (1 << RXCIE1);            // Enable RX Complete Interrupt
+        }
         break;
     case 2:
         // Baudrate
@@ -72,6 +80,14 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
         UCSR2B = (1 << RXEN2) | (1 << TXEN2);   // Enable RX + TX
         UCSR2C = (1 << UCSZ21) | (1 << UCSZ20); // 8N1
         
+        if(buffer_size > 0) 
+        {
+            uart2_rx_buffer = ringbuffer_create(buffer_size, sizeof(uint8_t));
+            if (!uart2_rx_buffer) {
+                return UART_ERROR_INIT_FAILED;
+            }
+            UCSR2B |= (1 << RXCIE2);            // Enable RX Complete Interrupt
+        }
         break;
     case 3:
         // Baudrate
@@ -82,6 +98,14 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
         UCSR3B = (1 << RXEN3) | (1 << TXEN3);   // Enable RX + TX
         UCSR3C = (1 << UCSZ31) | (1 << UCSZ30); // 8N1
         
+        if(buffer_size > 0) 
+        {
+            uart3_rx_buffer = ringbuffer_create(buffer_size, sizeof(uint8_t));
+            if (!uart3_rx_buffer) {
+                return UART_ERROR_INIT_FAILED;
+            }
+            UCSR3B |= (1 << RXCIE3);            // Enable RX Complete Interrupt
+        }
         break;
     default:
         return UART_ERROR_INIT_FAILED; // Invalid UART ID
@@ -89,13 +113,17 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
     return UART_OK;
 }
 
-uart_t uart_write_bytes(const uint8_t *data, uint16_t length)
+uart_t uart_write_bytes(uint8_t *data, uint8_t length)
 {
+    for(uint8_t i = 0; i < length; i++) 
+    {
+        uart_write_byte(UART0_ID, data[i]);
+    }
     return UART_OK;
 }
 
 
-uart_t uart_write_byte(uart_id_t uart_id, int8_t b)
+uart_t uart_write_byte(uart_id_t uart_id, uint8_t b)
 {
     switch (uart_id)
     {
@@ -121,45 +149,62 @@ uart_t uart_write_byte(uart_id_t uart_id, int8_t b)
     return UART_OK;
 }
 
-uint8_t uart_read_byte_blocking(uart_id_t uart_id)
+uart_t uart_read_byte_blocking(uart_id_t uart_id, uint8_t *byte)
 {
     switch (uart_id)
     {
     case UART0_ID:
         while (!(UCSR0A & (1 << RXC0))) { }   // vent på modtaget byte
-        return UDR0;
+        *byte = UDR0;
+        return UART_OK;
     case UART1_ID:
         while (!(UCSR1A & (1 << RXC1))) { }   // vent på modtaget byte
-        return UDR1;
+        *byte = UDR1;
+        return UART_OK;
     case UART2_ID:
         while (!(UCSR2A & (1 << RXC2))) { }   // vent på modtaget byte
-        return UDR2;
+        *byte = UDR2;
+        return UART_OK;
     case UART3_ID:
         while (!(UCSR3A & (1 << RXC3))) { }   // vent på modtaget byte
-        return UDR3;
+        *byte = UDR3;
+        return UART_OK;
     }
-    return 0;
+    return UART_ERROR_INVALID_ID;
 }
 
-uint8_t uart_read_byte(uart_id_t uart_id)
+uart_t uart_read_byte(uart_id_t uart_id, uint8_t *byte)
 {
-    uint8_t b;
-
     switch (uart_id)
     {
     case UART0_ID:
-        if(!ringbuffer_pop(uart0_rx_buffer, &b)) 
+        if(!ringbuffer_pop(uart0_rx_buffer, byte)) 
         {
-            b = 0; // No data available
+            return UART_NO_DATA_AVAILABLE;
         }
         break;
-    // case UART1_ID:
-    //    ringbuffer_pop(&uart1_rx_buffer, &b);
-    //    return b; 
-    // case UART2_ID:
-    // case UART3_ID:
+    case UART1_ID:
+        if(!ringbuffer_pop(uart1_rx_buffer, byte)) 
+        {
+            return UART_NO_DATA_AVAILABLE;
+        }
+        break;
+    case UART2_ID:
+        if(!ringbuffer_pop(uart2_rx_buffer, byte)) 
+        {
+            return UART_NO_DATA_AVAILABLE;
+        }
+        break;
+    case UART3_ID:
+        if(!ringbuffer_pop(uart3_rx_buffer, byte)) 
+        {
+            return UART_NO_DATA_AVAILABLE;
+        }
+        break;
+    default:
+        return UART_ERROR_INVALID_ID;
     }
-    return b;
+    return UART_OK;
 }
 
 
@@ -168,4 +213,25 @@ ISR(USART0_RX_vect)
     uint8_t byte = UDR0;
     // Push received byte into ring buffer.
     ringbuffer_push(uart0_rx_buffer, &byte);
+}
+
+ISR(USART1_RX_vect)
+{
+    uint8_t byte = UDR1;
+    // Push received byte into ring buffer.
+    ringbuffer_push(uart1_rx_buffer, &byte);
+}
+
+ISR(USART2_RX_vect)
+{
+    uint8_t byte = UDR2;
+    // Push received byte into ring buffer.
+    ringbuffer_push(uart2_rx_buffer, &byte);
+}
+
+ISR(USART3_RX_vect)
+{
+    uint8_t byte = UDR3;
+    // Push received byte into ring buffer.
+    ringbuffer_push(uart3_rx_buffer, &byte);
 }

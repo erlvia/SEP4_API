@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 // Buffer size for incoming bytes on stdio (UART0).
-#define UART_STDIO_RX_BUFFER_SIZE 64
+#define UART_STDIO_RX_BUFFER_SIZE 16
 
 // Initialize USART0 and bind stdin/stdout/stderr to it
 uart_t uart_stdio_init(uint32_t baud);

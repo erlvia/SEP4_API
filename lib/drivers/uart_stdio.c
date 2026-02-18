@@ -46,23 +46,27 @@ static int uart0_putchar(char c, FILE *stream)
     if (c == '\n') {
         uart_write_byte(UART0_ID, '\r');
     }
-    uart_write_byte(UART0_ID, (int8_t)c);
+    uart_write_byte(UART0_ID, (uint8_t)c);
     return 0;
 }
 
 static int uart0_getchar(FILE *stream)
 {
     (void)stream;
-
-    int8_t c;
+    uint8_t c;
+    uart_t result;
 
     #ifdef UART_STDIO_RX_BUFFER_SIZE
     do
     {
-        c = uart_read_byte(UART0_ID);
-    } while(0 == c); // Wait until a byte is available in the ring buffer
+        result = uart_read_byte(UART0_ID, &c);
+    } while(UART_OK != result); // Wait until a byte is available in the ring buffer
     #else
-        c = uart_read_byte_blocking(UART0_ID);
+        result = uart_read_byte_blocking(UART0_ID, &c);
+        if (UART_OK != result) 
+        {
+            return EOF;
+        }
     #endif
 
     // Convert CR to NL (makes enter key work as expected)

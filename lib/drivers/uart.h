@@ -22,7 +22,8 @@ typedef enum {
     UART_OK = 0,
     UART_ERROR_INVALID_BAUD_RATE = -1,
     UART_ERROR_INIT_FAILED = -2,
-    UART_ERROR_INVALID_ID = -3
+    UART_ERROR_INVALID_ID = -3,
+    UART_NO_DATA_AVAILABLE = -4
 } uart_t;
 
 typedef enum {
@@ -39,7 +40,7 @@ typedef enum {
 //uart_t uart_init(uart_id_t uart_id, uint32_t baud_rate, rx_callback_t rx_callback, ringbuffer_t *rx_buffer);
 
 uart_t uart_init(uart_id_t uart_id, uint32_t baud_rate, uint8_t buffer_size); // buffer_size=0 for no interrupt/ringbuffer, otherwise creates ringbuffer of specified size and enables RX interrupt
-uart_t uart_write_bytes(const uint8_t* data, uint16_t length);
-uart_t uart_write_byte(uart_id_t uart_id, int8_t b);
-uint8_t uart_read_byte(uart_id_t uart_id);
-uint8_t uart_read_byte_blocking(uart_id_t uart_id);
+uart_t uart_write_bytes(uint8_t* data, uint8_t length);
+uart_t uart_write_byte(uart_id_t uart_id, uint8_t b);
+uart_t uart_read_byte(uart_id_t uart_id, uint8_t *byte);
+uart_t uart_read_byte_blocking(uart_id_t uart_id, uint8_t *byte);
