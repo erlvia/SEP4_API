@@ -20,3 +20,5 @@ uart_t uart_stdio_init(uint32_t baud);
 void uart0_write_byte(int8_t b);
 int8_t uart0_read_byte_blocking(void);
 
+uint8_t gets_nonblocking(char *buffer, uint8_t max_length);
+void stdin_flush();

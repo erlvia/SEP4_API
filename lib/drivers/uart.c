@@ -157,11 +157,11 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ui
     return UART_OK;
 }
 
-uart_t uart_write_bytes(uint8_t *data, uint8_t length)
+uart_t uart_write_bytes(uart_id_t uart_id, uint8_t *data, uint8_t length)
 {
     for(uint8_t i = 0; i < length; i++) 
     {
-        uart_write_byte(UART0_ID, data[i]);
+        uart_write_byte(uart_id, data[i]);
     }
     return UART_OK;
 }
@@ -251,47 +251,100 @@ uart_t uart_read_byte(uart_id_t uart_id, uint8_t *byte)
     return UART_OK;
 }
 
+uart_t uart_send_string_blocking(uart_id_t uart_id, const char* str)
+{
+    while(*str) 
+    {
+        uart_write_byte(uart_id, (uint8_t)(*str));
+        str++;
+    }
+    return UART_OK;
+}
 
 ISR(USART0_RX_vect)
 {
     uint8_t byte = UDR0;
-    // Push received byte into ring buffer.
-    ringbuffer_push(uart0_rx_buffer, &byte);
-    if(uart0_rx_callback != NULL) 
+    if(uart0_rx_buffer == NULL) 
     {
-        uart0_rx_callback(byte);
+        // No ring buffer, just call callback if exists
+        if(uart0_rx_callback != NULL) 
+        {
+            uart0_rx_callback(byte);
+        }
+    }
+    else
+    {
+        // Push received byte into ring buffer.
+        ringbuffer_push(uart0_rx_buffer, &byte);
+        if((byte == '\n') && (uart0_rx_callback != NULL)) 
+        {
+            uart0_rx_callback(byte); // Call callback on receipt of '\n'
+        }
     }
 }
 
 ISR(USART1_RX_vect)
 {
     uint8_t byte = UDR1;
-    // Push received byte into ring buffer.
-    ringbuffer_push(uart1_rx_buffer, &byte);
-    if(uart1_rx_callback != NULL) 
+    if(uart1_rx_buffer == NULL) 
     {
-        uart1_rx_callback(byte);
+        // No ring buffer, just call callback if exists
+        if(uart1_rx_callback != NULL) 
+        {
+            uart1_rx_callback(byte);
+        }
+    }
+    else
+    {
+        // Push received byte into ring buffer.
+        ringbuffer_push(uart1_rx_buffer, &byte);
+        if((byte == '\n') && (uart1_rx_callback != NULL)) 
+        {
+            uart1_rx_callback(byte); // Call callback on receipt of '\n'
+        }
     }
 }
 
 ISR(USART2_RX_vect)
 {
     uint8_t byte = UDR2;
-    // Push received byte into ring buffer.
-    ringbuffer_push(uart2_rx_buffer, &byte);
-    if(uart2_rx_callback != NULL) 
+    if(uart2_rx_buffer == NULL) 
     {
-        uart2_rx_callback(byte);
+        // No ring buffer, just call callback if exists
+        if(uart2_rx_callback != NULL) 
+        {
+            uart2_rx_callback(byte);
+        }
+    }
+    else
+    {
+        // Push received byte into ring buffer.
+        ringbuffer_push(uart2_rx_buffer, &byte);
+        if((byte == '\n') && (uart2_rx_callback != NULL)) 
+        {
+            uart2_rx_callback(byte); // Call callback on receipt of '\n'
+        }
     }
 }
 
 ISR(USART3_RX_vect)
 {
     uint8_t byte = UDR3;
-    // Push received byte into ring buffer.
-    ringbuffer_push(uart3_rx_buffer, &byte);
-    if(uart3_rx_callback != NULL) 
+    if(uart3_rx_buffer == NULL) 
     {
-        uart3_rx_callback(byte);
+        // No ring buffer, just call callback if exists
+        if(uart3_rx_callback != NULL) 
+        {
+            uart3_rx_callback(byte);
+        }
+    }
+    else
+    {
+        // Push received byte into ring buffer.
+        ringbuffer_push(uart3_rx_buffer, &byte);
+        if((byte == '\n') && (uart3_rx_callback != NULL)) 
+        {
+            uart3_rx_callback(byte); // Call callback on receipt of '\n'
+        }
     }
 }

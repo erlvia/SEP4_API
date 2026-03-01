@@ -8,12 +8,20 @@
 #include "uart_stdio.h"
 #include <avr/io.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 static int uart0_putchar(char c, FILE *stream);
 static int uart0_getchar(FILE *stream);
 
+static bool _line_received = false;
+
 // Stream-objekt for stdio
 static FILE uart0_stream;
+
+static void _uart0_line_callback(uint8_t b)
+{
+    _line_received = true;
+}
 
 uart_t uart_stdio_init(uint32_t baud)
 {
@@ -21,7 +29,7 @@ uart_t uart_stdio_init(uint32_t baud)
 
     #ifdef UART_STDIO_RX_BUFFER_SIZE
     {
-    result = uart_init(UART0_ID, baud, NULL, UART_STDIO_RX_BUFFER_SIZE);
+    result = uart_init(UART0_ID, baud, _uart0_line_callback, UART_STDIO_RX_BUFFER_SIZE);
     }
     #else
     result = uart_init(UART0_ID, baud, NULL, 0);
@@ -36,6 +44,32 @@ uart_t uart_stdio_init(uint32_t baud)
         stderr = &uart0_stream;
     }
     return result;
+}
+
+uint8_t gets_nonblocking(char *buffer, uint8_t max_length)
+{
+    uart_t result;
+    uint8_t index = 0;
+    uint8_t c;
+
+    if(_line_received) 
+    {
+        while ((result = uart_read_byte(UART0_ID, &c)) == UART_OK && c != '\n' && index < max_length - 1) 
+        {
+            buffer[index++] = c;
+        }
+        buffer[index] = '\0'; // Null-terminate the string
+        _line_received = false; // Reset flag for next line
+    }
+    return index; // Return number of characters read
+}
+
+void stdin_flush()
+{
+    uint8_t dummy;
+    while (uart_read_byte(UART0_ID, &dummy) == UART_OK) {
+        // Discard all bytes in the buffer
+    }
 }
 
 static int uart0_putchar(char c, FILE *stream)
@@ -70,7 +104,7 @@ static int uart0_getchar(FILE *stream)
     #endif
 
     // Convert CR to NL (makes enter key work as expected)
-    if (c == '\r') c = '\n';
+//    if (c == '\r') c = '\n';
 
     return (int)c;
 }

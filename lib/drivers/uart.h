@@ -43,9 +43,8 @@ typedef void (*rx_callback_t)(uint8_t byte);
 //             callback:    Function to call when a byte is received. If NULL, no callback will be used 
 //                          but if buffer_size > 0 rx-interrupt is enabled and stores received bytes in
 //                          ringbuffer. If non-NULL, callback will be called with received byte as 
-//                          argument when a byte is received. 
-//                          Note: If using stdio, do not call uart_init. Call uart_stdio_init(...)
-//                          instead, which initializes UART0 and binds it to stdio.
+//                          argument when a byte is received but only if buffer_size is 0. See table below.
+//                          NOTE: If using stdio, use uart_stdio_init(...) to initializes UART0 and binds it to stdio.
 //
 //                          buffer_size | callback | Behavior
 //                          --------------------------------------------------------------------------------
@@ -56,13 +55,14 @@ typedef void (*rx_callback_t)(uint8_t byte);
 //                          >0          | NULL     | RX interrupt enabled, ringbuffer of specified size created for
 //                                      |          | incoming bytes. Use uart_read_byte to read bytes from ringbuffer.
 //                          >0          | non-NULL | RX interrupt enabled, ringbuffer of specified size created for
-//                                      |          | incoming bytes, callback will be called with received byte as argument
-//                                      |          | when a byte is received. Use uart_read_byte to read bytes from ringbuffer.
+//                                      |          | incoming bytes. Callback on receipt of '\n'.
 //                          ---------------------------------------------------------------------------------
 // RETURNS: UART_OK on success, or negative error code on failure.
 uart_t uart_init(uart_id_t uart_id, uint32_t baud_rate, rx_callback_t rx_callback, uint8_t buffer_size);
 
-uart_t uart_write_bytes(uint8_t* data, uint8_t length);
+uart_t uart_write_bytes(uart_id_t uart_id, uint8_t* data, uint8_t length);
 uart_t uart_write_byte(uart_id_t uart_id, uint8_t b);
 uart_t uart_read_byte(uart_id_t uart_id, uint8_t *byte);
 uart_t uart_read_byte_blocking(uart_id_t uart_id, uint8_t *byte);
+
+uart_t uart_send_string_blocking(uart_id_t uart_id, const char* str);
