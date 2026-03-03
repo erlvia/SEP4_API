@@ -11,10 +11,14 @@
 #include "timer.h"
 #include "wifi.h"
 #include "button.h"
+#include "buzzer.h"
+#include "dht11.h"
+#include "proximity.h"
+#include "servo.h"
 
 // #include "uart.h"
 #define MAX_STRING_LENGTH 100
-#define MAX_MENU_OPTIONS 6
+#define MAX_MENU_OPTIONS 10
 
 static bool _pir_active = false;
 static int x = 0;
@@ -31,12 +35,16 @@ uint8_t menu(void)
     int choice = 0;
     puts("VIA UNIVERSITY COLLEGE SEP4 IoT Hardware DRIVERS DEMO");
     puts("\tMenu:");
-    puts("\t1. Button and LED");
-    puts("\t2. PIR Sensor");
-    puts("\t3. Display");
-    puts("\t4. WiFi");
-    puts("\t5. stdio");
-    puts("\t6. Timer");
+    puts("\t 1. Button and LED");
+    puts("\t 2. PIR Sensor (HC-SR501)");
+    puts("\t 3. Display");
+    puts("\t 4. WiFi (ESP8266)");
+    puts("\t 5. stdio");
+    puts("\t 6. Timer");
+    puts("\t 7. Buzzer");
+    puts("\t 8. Temperature and humiduty sensor (DHT11)");
+    puts("\t 9. Proximity sensor (HC-SR04)");
+    puts("\t10. Servo motor (SG90)");
 
     printf("Choose a driver to test (1-%d): ", MAX_MENU_OPTIONS);
     stdin_flush(); // Flush any leftover '\n' input from the buffer
@@ -208,9 +216,77 @@ int main(void)
             led_off(2);
             timer_delete(led2_timer_id);
             break;
+        case 7:
+            puts("Buzzer driver demo. Press button 2 to hear a beep. Type 'q' to exit.");
+            do
+            {
+                if (button_get(2))
+                {
+                    buzzer_beep();  // Call the buzzer beep function
+                    _delay_ms(200); // Debounce delay
+                }
+            } while (!_quit());
+            break;
+        case 8:
+            puts("DHT11 driver demo. Type 'q' to exit.");
+            puts("Temperature and humidity will be printed every 2 seconds.");
+            do
+            {
+                uint8_t humidity_integer, humidity_decimal, temperature_integer, temperature_decimal;
+                DHT11_ERROR_MESSAGE_t error = dht11_get(&humidity_integer, &humidity_decimal, &temperature_integer, &temperature_decimal);
+                if (error == DHT11_OK)
+                {
+                    printf("Temperature: %d.%d°C, Humidity: %d.%d%%\n", temperature_integer, temperature_decimal, humidity_integer, humidity_decimal);
+                }
+                else
+                {
+                    printf("Failed to read DHT11 sensor data\n");
+                }
+                _delay_ms(2000); // Wait 2 seconds before next reading
+            } while (!_quit());
+            break;
+        case 9:
+            puts("Proximity sensor driver demo. Type 'q' to exit.");
+            puts("Distance in mm will be printed every 2 seconds.");
+            proximity_init();
+            do
+            {
+                uint16_t distance = proximity_measure();
+                if (distance == UINT16_MAX)
+                {
+                    printf("Proximity sensor timeout. No object detected within range.\n");
+                }
+                else
+                {
+                    printf("Distance: %d mm\n", distance);
+                }
+                _delay_ms(2000); // Wait 2 seconds before next reading
+            } while (!_quit());
+            break;
+        case 10:
+            puts("Servo motor driver demo. Type 'q' to exit.");
+            servo_init(PWM_NORMAL);
+            servo_start();
+            int angle;
+            printf("Enter angle (-90 to 90): ");
+            while (scanf("%d", &angle) == 1)
+            {
+                if (angle < -90 || angle > 90)
+                {
+                    puts("Invalid angle. Please enter a value between -90 and 90.");
+                }
+                else
+                {
+                    servo_setAngle(PWM_A, (int8_t)angle);
+                    servo_setAngle(PWM_B, (int8_t)angle);
+                    printf("Servo set to %d degrees.\n", angle);
+                }
+            }
+            servo_stop();
+            break;
         default:
-            printf("Ugyldigt valg.\n");
-            continue; // Gå tilbage til menuen
+            printf("Error: Invalid selection.\n");
+            break;
         }
     }
     return 0;
