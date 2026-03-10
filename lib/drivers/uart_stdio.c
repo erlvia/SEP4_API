@@ -104,7 +104,7 @@ static int uart0_getchar(FILE *stream)
     #endif
 
     // Convert CR to NL (makes enter key work as expected)
-//    if (c == '\r') c = '\n';
+    if (c == '\r') c = '\n';
 
     return (int)c;
 }
