@@ -154,7 +154,6 @@ int interactive_demo(void)
             scanf("%*s"); // Clear invalid input from buffer
             break;
         case 4:
-            wifi_init();
             printf("WiFi driver demo. Press Reset to exit.\n");
             printf("Enter WIFI SSID (max. 27 characters): ");
             while(getchar() != '\n') // Clear newline left in buffer from previous input
@@ -267,7 +266,6 @@ int interactive_demo(void)
         case 9:
             printf("Proximity sensor driver demo. Type 'q' to exit.\n");
             printf("Distance in mm will be printed every 2 seconds.\n");
-            proximity_init();
             do
             {
                 uint16_t distance = proximity_measure();
@@ -286,7 +284,6 @@ int interactive_demo(void)
         {
             int angle;
             printf("Servo motor driver demo. Type 'q' to exit.\n");
-            servo_init(PWM_NORMAL);
             servo_start();
             printf("Enter angle (-90 to 90): ");
             while (scanf("%d", &angle) == 1)
@@ -309,11 +306,6 @@ int interactive_demo(void)
         case 11:
             printf("Light sensor driver demo. Type 'q' to exit.\n");
             printf("Light level will be printed every 2 seconds.\n");
-            if(light_init() != ADC_OK)
-            {
-                printf("Failed to initialize light sensor.\n");
-                break;
-            }
             do
             {
                 uint16_t light_level = light_measure_raw();
@@ -331,11 +323,6 @@ int interactive_demo(void)
         case 12:
             printf("Soil moisture sensor driver demo. Type 'q' to exit.\n");
             printf("Soil moisture level will be measured on PK0 every 2 seconds.\n");
-            if(soil_init(ADC_PK0) != ADC_OK)
-            {
-                printf("Failed to initialize soil moisture sensor on ADC_PK0.\n");
-                break;
-            }
             do
             {
                 uint16_t soil_moisture = soil_measure_raw(ADC_PK0);
@@ -352,7 +339,6 @@ int interactive_demo(void)
             break;
         case 13:
             printf("Playing Star Wars theme on the speaker. Press Reset to exit.\n");
-            tone_init();
             tone_play_starwars();
             break;
         case 14:
@@ -360,7 +346,6 @@ int interactive_demo(void)
             // int16_t x, y, z;
             // printf("ADXL345 Accelerometer demo. Type 'q' to exit.\n");
             // printf("X, Y, Z acceleration values will be printed every 2 seconds.\n");
-            // adxl345_init();
             // do
             // {
             //     adxl345_read_xyz(&x, &y, &z);
