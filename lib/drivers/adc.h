@@ -51,4 +51,4 @@ ADC_Error_t adc_create(ADC_Channel_t channel, ADC_Reference_t reference);
 // Returns UINT16_MAX if an error occurs (e.g. invalid channel or reference).
 // NOTE: This function is blocking. Conversion time is typically around 200 microseconds.
 //       ADC Clock is set to F_CPU/128 to obtain 10-bit resolution. Make sure to call adc_create() before calling this function.
-uint16_t adc_read(ADC_Channel_t channel); 
+uint16_t adc_measure(ADC_Channel_t channel); 

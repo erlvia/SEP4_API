@@ -24,9 +24,9 @@ ADC_Error_t light_init()
 // The KY-018 light sensor outputs a low value for bright light
 // and a high value for darkness. To make it more intuitive, we invert
 // the value so that low values = dark and high values = bright.
-uint16_t light_read_raw()
+uint16_t light_measure_raw()
 {
-    uint16_t raw_value = adc_read(ADC_PK7);
+    uint16_t raw_value = adc_measure(ADC_PK7);
     if(raw_value > 1023) 
     {
         return raw_value; // Return error value

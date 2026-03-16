@@ -26,9 +26,9 @@ ADC_Error_t soil_init(ADC_Channel_t channel)
 // Returns a value between 0 and 1023 (10-bit resolution).
 // Low values = dry, high values = wet.
 // On error (e.g. invalid channel or reference), returns UINT16_MAX.
-uint16_t soil_read_raw(ADC_Channel_t channel)
+uint16_t soil_measure_raw(ADC_Channel_t channel)
 {
-    uint16_t raw_value = adc_read(channel);
+    uint16_t raw_value = adc_measure(channel);
     if(raw_value > 1023) 
     {
         return raw_value; // Return error value
