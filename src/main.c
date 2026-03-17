@@ -41,7 +41,7 @@ int main(void)
     light_init();
     soil_init(ADC_PK0);
     pir_init(pir_callback);
-    tone_init();
+//    tone_init();
     wifi_init();
     servo_init(PWM_NORMAL);
 //    adxl345_init();
@@ -61,7 +61,7 @@ int main(void)
 
     timer_create_sw(timer_callback, 1000); // Create a timer that toggles an LED every 1 second
 
-//    tone_play_starwars();
+    tone_play_starwars();
 
     // Test servo by sweeping from -90 to +90 degrees and back
     servo_start();

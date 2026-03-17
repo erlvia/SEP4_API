@@ -9,7 +9,7 @@
  *  Date:    Unknown
  * 
  *  Refactored by: Erland Larsen
- *  Date:    2026-03-15
+ *  Date:    2026-03-17
  *  Project: SPE4_API
  **********************************************/
 #include "tone.h"
@@ -20,16 +20,14 @@
 #define BUZ_DDR DDRA
 #define BUZ_PORT PORTA
 
-void tone_init()
-{
-    BUZ_DDR|=(1<<BUZ_BIT);
-}
-
 void tone_play(uint16_t frequency, uint16_t duration) 
 {
     uint8_t prescaler_bits = 0;
     uint16_t prescaler_value = 0;
     uint16_t num_ticks = 0;
+
+    // Set BUZ_BIT as output
+    BUZ_DDR|=(1<<BUZ_BIT);
 
     // Calculate the half-period delay in microseconds
     uint16_t delay_us = 500000 / frequency;
@@ -106,6 +104,9 @@ void tone_play(uint16_t frequency, uint16_t duration)
     }
     // Stop the timer
     TCCR2B = 0;
+
+    // Set BUZ_BIT as input to turn off the buzzer
+    BUZ_DDR&=~(1<<BUZ_BIT);
 }
 
 void tone_play_starwars()
