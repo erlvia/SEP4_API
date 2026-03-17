@@ -1,3 +1,17 @@
+/*****************************************************************************
+ * main.c
+ *  Main application file for the IoT hardware drivers demo.
+ *  This file initializes all the hardware drivers and demonstrates their
+ *  functionality.
+ *  Push button 2 on the shield during reset to enter continious sensor
+ *  reading mode. Otherwise the program will run an interactive demo that
+ *  allows you to test each driver individually by sending commands over UART.
+ *  See interactive.c for details.
+ * 
+ *  Author:  Erland Larsen
+ *  Date:    2026-03-17
+ *  Project: SPE4_API
+ *****************************************************************************/
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -94,11 +108,11 @@ int main(void)
         display_int(temperature_integer*10 + temperature_decimal);
         printf(" Light: %d ", light_measure_raw());
         printf(" Soil: %d", soil_measure_raw(ADC_PK0));
-        printf(" Motion: %s", (pir_get_state() == PIR_NO_MOTION) ? "No" : "Yes");
         printf(" Distance: %d mm", proximity_measure());
         // adxl345_read_xyz(&_x, &_y, &_z);
         // printf(" Accel: X=%d Y=%d Z=%d", _x, _y, _z);
-        puts("");
+        printf(" Motion: %s", (pir_get_state() == PIR_NO_MOTION) ? "No" : "Yes");
+       puts("");
         _delay_ms(2000);
     }
 }

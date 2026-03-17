@@ -1,3 +1,17 @@
+/*****************************************************************************
+ * interactive.c
+ *  Interactive application file for the IoT hardware drivers demo.
+ *  This file implements an interactive demo that allows you to test each
+ *  driver.
+ *  The demo presents a menu where you can select which driver to
+ *  test.
+ *  Connect a terminal (e.g. yat) to the board on uart0 and follow the
+ *  instructions for each driver.
+ * 
+ *  Author:  Erland Larsen
+ *  Date:    2026-03-17
+ *  Project: SPE4_API
+ *****************************************************************************/
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
