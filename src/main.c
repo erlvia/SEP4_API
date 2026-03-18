@@ -32,7 +32,6 @@
 #include "light.h"
 #include "soil.h"
 #include "tone.h"
-#include "adxl345.h"
 #include "timer.h"
 //#include "adxl345.h"
 
