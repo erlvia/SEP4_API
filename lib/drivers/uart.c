@@ -261,6 +261,7 @@ uart_t uart_send_string_blocking(uart_id_t uart_id, const char* str)
     return UART_OK;
 }
 
+#ifndef UNITY_TEST
 ISR(USART0_RX_vect)
 {
     uint8_t byte = UDR0;
@@ -282,6 +283,7 @@ ISR(USART0_RX_vect)
         }
     }
 }
+#endif
 
 ISR(USART1_RX_vect)
 {

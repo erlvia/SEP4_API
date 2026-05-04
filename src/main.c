@@ -33,16 +33,23 @@
 #include "soil.h"
 #include "tone.h"
 #include "timer.h"
+#include "co2.h"
 //#include "adxl345.h"
 
 uint8_t humidity_integer, humidity_decimal, temperature_integer, temperature_decimal;
 static int8_t _led_no = 0;
 //static int16_t _x, _y, _z;
+static uint16_t _co2 = 0;
 
 void timer_callback(uint8_t id)
 {
     led_toggle((_led_no%4) + 1); // Toggle LEDs in sequence 1-4
     _led_no++;
+}
+
+void co2_callback(uint16_t co2_ppm)
+{
+    _co2 = co2_ppm;
 }
 
 int main(void)
@@ -58,6 +65,7 @@ int main(void)
     wifi_init();
     servo_init(PWM_NORMAL);
 //    adxl345_init();
+    co2_init(co2_callback);
 
     if (UART_OK != uart_stdio_init(115200))
     {
@@ -108,10 +116,12 @@ int main(void)
         printf(" Light: %d ", light_measure_raw());
         printf(" Soil: %d", soil_measure_raw(ADC_PK0));
         printf(" Distance: %d mm", proximity_measure());
+        printf(" CO2: %d ppm", _co2);
         // adxl345_read_xyz(&_x, &_y, &_z);
         // printf(" Accel: X=%d Y=%d Z=%d", _x, _y, _z);
         printf(" Motion: %s", (pir_get_state() == PIR_NO_MOTION) ? "No" : "Yes");
-       puts("");
+        puts("");
         _delay_ms(2000);
+        co2_start_measure(); // Trigger CO2 measurement for next reading       
     }
 }
