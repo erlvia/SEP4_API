@@ -5,6 +5,13 @@ void co2_uart_rx_callback(uint8_t byte);
 
 static uint16_t _test_co2_ppm = 0;
 
+void co2_test_callback(uint16_t co2_ppm)
+{
+    // This is a test callback function that can be used to verify that the callback mechanism works
+    // For example, we could set a global variable here to check if the callback was called with the correct value
+    _test_co2_ppm = co2_ppm;
+}
+
 void setUp(void) 
 {
     // This is run before EACH test
@@ -18,7 +25,7 @@ void tearDown(void)
 
 void test_co2_init_valid_callback(void) 
 {
-    co2_status_t status = co2_init((void (*)(uint16_t))1); // Pass a non-NULL callback
+    co2_status_t status = co2_init(co2_test_callback); // Pass a non-NULL callback
     TEST_ASSERT_EQUAL(CO2_OK, status); // Initialization should succeed
 }
 
@@ -31,19 +38,12 @@ void test_co2_init_null_callback(void)
 void test_co2_start_measure(void) 
 {
     // First, initialize with a valid callback
-    co2_status_t status = co2_init((void (*)(uint16_t))1);
+    co2_status_t status = co2_init(co2_test_callback);
     TEST_ASSERT_EQUAL(CO2_OK, status); // Initialization should succeed
 
     // Now start measurement
     status = co2_start_measure();
     TEST_ASSERT_EQUAL(CO2_OK, status); // Starting measurement should succeed
-}
-
-void co2_test_callback(uint16_t co2_ppm)
-{
-    // This is a test callback function that can be used to verify that the callback mechanism works
-    // For example, we could set a global variable here to check if the callback was called with the correct value
-    _test_co2_ppm = co2_ppm;
 }
 
 void test_co2_callback_mechanism_correct_checksum(void) 

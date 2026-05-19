@@ -44,7 +44,33 @@ static char _tmp_buff2[MAX_STRING_LENGTH] = {0};
 static bool _tcp_string_received = false;
 static bool _pir_active = false;
 
-char welcome_text[] = "Welcome from SEP4 IoT hardware!\n";
+// char welcome_text[] = "Welcome from SEP4 IoT hardware!\n";
+
+// Test long transmissions (>255 characters) to verify the wifi driver.
+char welcome_text[] = "\n   Alice was beginning to get very tired of sitting by her sister \
+on the bank, and of having nothing to do:  once or twice she had \
+peeped into the book her sister was reading, but it had no \
+pictures or conversations in it, `and what is the use of a book,' \
+thought Alice `without pictures or conversation?' \r\n\
+  So she was considering in her own mind (as well as she could, \
+for the hot day made her feel very sleepy and stupid), whether \
+the pleasure of making a daisy-chain would be worth the trouble \
+of getting up and picking the daisies, when suddenly a White \
+Rabbit with pink eyes ran close by her. \r\n\n\
+  There was nothing so VERY remarkable in that; nor did Alice \
+think it so VERY much out of the way to hear the Rabbit say to \
+itself, `Oh dear!  Oh dear!  I shall be late!'  (when she thought \
+it over afterwards, it occurred to her that she ought to have \
+wondered at this, but at the time it all seemed quite natural); \
+but when the Rabbit actually TOOK A WATCH OUT OF ITS WAISTCOAT-\
+POCKET, and looked at it, and then hurried on, Alice started to \
+her feet, for it flashed across her mind that she had never \
+before seen a rabbit with either a waistcoat-pocket, or a watch to \
+take out of it, and burning with curiosity, she ran across the \
+field after it, and fortunately was just in time to see it pop \
+down a large rabbit-hole under the hedge.\r\n\n\
+  In another moment down went Alice after it, never once \
+considering how in the world she was to get out again. \n";
 
 uint8_t menu(void)
 {
@@ -117,7 +143,7 @@ void start_stop_timer(uint8_t id)
 
 void wifi_line_callback(const char *line)
 {
-    uint8_t _index;
+    uint16_t _index;
     _index = strlen(_tmp_buff1);
     _tmp_buff1[_index] = '\r';
     _tmp_buff1[_index + 1] = '\n';
@@ -187,7 +213,7 @@ int interactive_demo(void)
             printf("Enter IP address of TCP server to connect to: ");
             gets(_tmp_buff1); puts(_tmp_buff1); // Reusing _tmp_buff1 to store the IP address
 
-            WIFI_ERROR_MESSAGE_t message = wifi_command_create_TCP_connection(_tmp_buff1, 23, wifi_line_callback, _tmp_buff1);
+            WIFI_ERROR_MESSAGE_t message = wifi_command_create_TCP_connection_n(_tmp_buff1, 23, wifi_line_callback, _tmp_buff1, sizeof(_tmp_buff1));
             if( message != WIFI_OK)
             {
                 printf("Failed to create TCP connection. %d\n", message);
