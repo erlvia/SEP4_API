@@ -11,6 +11,9 @@
  *  Author:  Erland Larsen
  *  Date:    2026-03-17
  *  Project: SPE4_API
+ *  Revisions: 1.0 - Initial implementation
+ *             1.1 - Added CO2 sensor support and demo
+ *             1.2 - Added ADXL345 accelerometer support and demo
  *****************************************************************************/
 #include <avr/io.h>
 #include <util/delay.h>
@@ -34,11 +37,11 @@
 #include "tone.h"
 #include "timer.h"
 #include "co2.h"
-//#include "adxl345.h"
+#include "adxl345.h"
 
 uint8_t humidity_integer, humidity_decimal, temperature_integer, temperature_decimal;
 static int8_t _led_no = 0;
-//static int16_t _x, _y, _z;
+static int16_t _x, _y, _z;
 static uint16_t _co2 = 0;
 
 void timer_callback(uint8_t id)
@@ -61,10 +64,9 @@ int main(void)
     light_init();
     soil_init(ADC_PK0);
     pir_init(pir_callback);
-//    tone_init();
     wifi_init();
     servo_init(PWM_NORMAL);
-//    adxl345_init();
+    adxl345_init();
     co2_init(co2_callback);
 
     if (UART_OK != uart_stdio_init(115200))
@@ -75,6 +77,7 @@ int main(void)
     }
     sei(); // Enable global interrupts
     printf("VIA UNIVERSITY COLLEGE SEP4 IoT Hardware DRIVERS DEMO\n");
+    printf("ADXL345 device ID: 0x%02X\n", adxl345_read_register(0x00)); // Read and print the device ID of the ADXL345
     if(!button_get(2))
     {
         interactive_demo();
@@ -82,7 +85,7 @@ int main(void)
 
     timer_create_sw(timer_callback, 1000); // Create a timer that toggles an LED every 1 second
 
-    tone_play_starwars();
+    // tone_play_starwars();
 
     // Test servo by sweeping from -90 to +90 degrees and back
     servo_start();
@@ -117,8 +120,8 @@ int main(void)
         printf(" Soil: %d", soil_measure_raw(ADC_PK0));
         printf(" Distance: %d mm", proximity_measure());
         printf(" CO2: %d ppm", _co2);
-        // adxl345_read_xyz(&_x, &_y, &_z);
-        // printf(" Accel: X=%d Y=%d Z=%d", _x, _y, _z);
+        adxl345_read_xyz(&_x, &_y, &_z);
+        printf(" Accel: X=%d Y=%d Z=%d", _x, _y, _z);
         printf(" Motion: %s", (pir_get_state() == PIR_NO_MOTION) ? "No" : "Yes");
         puts("");
         _delay_ms(2000);
